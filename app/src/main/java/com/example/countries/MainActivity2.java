@@ -38,7 +38,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity2 extends AppCompatActivity {
     BarChart barChart;
-    public int wait = 1;
     ArrayList<String> nameTxts = new ArrayList<String>();
     ArrayList<Integer> populations = new ArrayList<Integer>();
 
