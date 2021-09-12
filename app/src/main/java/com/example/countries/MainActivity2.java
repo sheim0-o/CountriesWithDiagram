@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity2 extends AppCompatActivity {
     BarChart barChart;
-    ArrayList<String> nameTxts = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<String>();
     ArrayList<Integer> populations = new ArrayList<Integer>();
 
     @Override
@@ -47,7 +48,7 @@ public class MainActivity2 extends AppCompatActivity {
         setContentView(R.layout.activity_main2);
         barChart = findViewById(R.id.barChart);
 
-        loadDiagram();
+        loadRetrofit();
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
@@ -55,7 +56,7 @@ public class MainActivity2 extends AppCompatActivity {
         }
     }
 
-    public void loadDiagram()
+    public void loadRetrofit()
     {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://restcountries.com/v2/")
@@ -75,19 +76,19 @@ public class MainActivity2 extends AppCompatActivity {
                 String nameTxt;
                 Integer population;
 
-                nameTxts.clear();
+                names.clear();
                 populations.clear();
                 for(API country:posts){
                     nameTxt = country.getName();
                     population = country.getPopulation();
 
-                    nameTxts.add(nameTxt);
+                    names.add(nameTxt);
                     populations.add(population);
                 }
 
+                //sort
                 int i = 1;
                 int p = 2;
-
                 while(i < populations.size()){
                     if (populations.get(i - 1) > populations.get(i)) {
                     p++;
@@ -97,9 +98,9 @@ public class MainActivity2 extends AppCompatActivity {
                         populations.set(i, populations.get(i - 1));
                         populations.set(i-1, tmpPop);
 
-                        String tmpName = nameTxts.get(i);
-                        nameTxts.set(i, nameTxts.get(i-1));
-                        nameTxts.set(i-1, tmpName);
+                        String tmpName = names.get(i);
+                        names.set(i, names.get(i-1));
+                        names.set(i-1, tmpName);
                     i--;
                     if (i == 0) {
                         p++;
@@ -117,27 +118,43 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
     public void onChangeRadioGroup(View v){
+        ArrayList<Integer> numbers = new ArrayList<Integer>();
+        for(int i = 0; i<5;i++) {
+            numbers.add(i);
+        }
+
+        Random rand = new Random();
+        ArrayList<Integer> randNumbers = new ArrayList<Integer>();
+        for(int i = 0; i<5;i++) {
+            boolean flag = false;
+            int temp = rand.nextInt(populations.size());
+            if(!randNumbers.contains(temp))
+                flag = true;
+            if(flag)
+                randNumbers.add(temp);
+        }
+
         switch (v.getId()) {
             case R.id.radio_button_1:
-                setDiagram1(nameTxts, populations);
+                setChart(numbers);
                 break;
             case R.id.radio_button_2:
-                setDiagram2();
+                setChart(randNumbers);
                 break;
         }
     }
 
-    public void setDiagram1(ArrayList<String> names, ArrayList<Integer> pop){
+    public void setChart(ArrayList<Integer> numbers){
         ArrayList<BarEntry> entries = new ArrayList<>();
-
-        for(int i = 0; i<5;i++)
-            entries.add(new BarEntry(i, (float)populations.get(i)));
+        for(int i = 0; i<5;i++) {
+            entries.add(new BarEntry(i, (float) populations.get(numbers.get(i))));
+        }
 
         ArrayList<String> labels = new ArrayList<String>();
         String message = "";
         for(int i = 0; i<5;i++) {
             labels.add(String.valueOf(i+1));
-            message = message + (i+1) + " - " + nameTxts.get(i) +"\n";
+            message = message + (i+1) + " - " + names.get(numbers.get(i)) +"\n";
         }
         TextView tableOfCountries = findViewById(R.id.tableOfCountries);
         tableOfCountries.setText(message);
@@ -151,51 +168,6 @@ public class MainActivity2 extends AppCompatActivity {
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-        dataset.setValueTextSize(10f);
-        dataset.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        barChart.getAxisRight().setAxisMinimum(0f);
-        barChart.getAxisLeft().setAxisMinimum(0f);
-        barChart.animateY(500);
-        barChart.getDescription().setEnabled(false);
-        barChart.setViewPortOffsets(0f, 0f, 0f, 100f);
-
-        barChart.setData(data);
-        barChart.invalidate();
-    }
-
-    public void setDiagram2(){
-        ArrayList<BarEntry> entries = new ArrayList<>();
-
-        Random rand = new Random();
-        ArrayList<Integer> randNumbers = new ArrayList<Integer>();
-        for(int i = 0; i<5;i++) {
-            boolean flag = false;
-            int temp = rand.nextInt(populations.size());
-            if(!randNumbers.contains(temp))
-                flag = true;
-            if(flag)
-                randNumbers.add(temp);
-        }
-
-        for(int i = 0; i<5;i++)
-            entries.add(new BarEntry(i, (float)populations.get(randNumbers.get(i))));
-        ArrayList<String> labels = new ArrayList<String>();
-        String message = "";
-        for(int i = 0; i<5;i++) {
-            labels.add((i+1) + "");
-            message = message + (i+1) + " - " + nameTxts.get(randNumbers.get(i)) +"\n";
-        }
-        TextView tableOfCountries = findViewById(R.id.tableOfCountries);
-        tableOfCountries.setText(message);
-
-        BarDataSet dataset = new BarDataSet(entries, "Countries");
-        BarData data = new BarData(dataset);
-
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
 
         dataset.setValueTextSize(10f);
         dataset.setAxisDependency(YAxis.AxisDependency.LEFT);

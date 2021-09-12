@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     ListView list;
     ArrayList<Country> countries = new ArrayList<Country>();
     public CountryAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

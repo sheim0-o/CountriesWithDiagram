@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:onClick="onClickA1"
-        android:text="Button"
+        android:text="To charts"
         app:backgroundTint="#46DFA1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
